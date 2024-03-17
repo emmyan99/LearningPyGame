@@ -19,6 +19,8 @@ def main():
     screen.fill("black")
     snake = pygame.draw.rect(screen, "green", (360, 360, 20, 20), 0)
     food = pygame.draw.circle(screen, "orange", (random.randint(0,720), random.randint(0,720)), 4)
+    moving = False
+    speed = 0
 
     while running:
         for event in pygame.event.get():
@@ -31,20 +33,16 @@ def main():
         food = pygame.draw.circle(screen, "orange", (food.centerx, food.centery), 4)
         snake = pygame.draw.rect(screen, "green", (snake.left, snake.top, snake.width, snake.height), 0)
         
-        #TODO FIX KEY PRIORITY
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:
-            snake.move_ip(-dt * 200, 0)
-        elif keys[pygame.K_d]:
-            snake.move_ip(dt * 100, 0)
-        elif keys[pygame.K_w]:
-            snake.move_ip(0, -dt * 300)
-        elif keys[pygame.K_s]:
-            snake.move_ip(0, dt * 300)
+        if any(keys) == True:
+            moving = True
 
+        if moving == True:
+            snake = snakeMovement(speed, keys, snake)
+        
         edgeCollision(snake.left, snake.right, snake.top, snake.bottom)
         score, snake = foodCollision(snake, food, score, screen)
-        print(type(snake))
+        #print(type(snake))
         drawGrid(screen)
 
         # flip() the display to put your work on screen
@@ -86,6 +84,23 @@ def drawGrid(screen):
         pygame.draw.line(screen, (100, 100, 100), (0, i), (720, i))
         pygame.draw.line(screen, (100, 100, 100), (i, 0), (i, 720))
     pygame.display.update()    
+
+def snakeMovement(speed, keys, snake):
+    #TODO FIX KEY PRIORITY
+    if keys[pygame.K_a]:
+        speed -= 20
+        snake.move_ip(speed, 0)
+    elif keys[pygame.K_d]:
+        speed += 20
+        snake.move_ip(speed, 0)
+    elif keys[pygame.K_w]:
+        speed -= 20
+        snake.move_ip(0, speed)
+    elif keys[pygame.K_s]: 
+        speed += 20
+        snake.move_ip(0, speed)
+    return snake
+
 
 
 main()

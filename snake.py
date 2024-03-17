@@ -1,9 +1,7 @@
 import pygame
 import random
 
-#TODO: SNAP SNAKE TO GRID 
-#TODO: FIX FOOD PLACEMENT ON GRID
-#TODO: INCREMENT SIZE OF SNAKE
+#TODO: INCREMENT SIZE OF SNAKE, REMOVE UNION AND USE SEVERAL RECTANGLES
 #TODO: FIX MOVEMENT OF LARGER SNAKE
 #TODO: COLLISION WITH SELF 
 #TODO: FIX SNAKE AUTOMATIC MOVEMENT
@@ -14,50 +12,49 @@ def main():
     pygame.init()
 
     screen = pygame.display.set_mode((720, 720))
-    clock = pygame.time.Clock()
     running = True
-    dt = 0
     score = 0
     screen.fill("black")
     snake = pygame.draw.rect(screen, "green", (360, 360, 30, 30), 0)
-    food = pygame.draw.circle(screen, "orange", (random.randint(0,720), random.randint(0,720)), 4)
+    foodX = 15+(30*(random.randint(0,23)))
+    foodY = 15+(30*(random.randint(0,23)))
+    food = pygame.draw.circle(screen, "orange", (foodX, foodY), 6)
     moving = False
-    #speed = 1
     lastDir = (0,0)
+    iterationCounter = 0
+    EASY = 60
+    MEDIUM = 40
+    HARD = 20
+    difficulty = EASY
 
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+        
+        iterationCounter +=1
 
         # wipe last frame
         screen.fill("black")
 
-        food = pygame.draw.circle(screen, "orange", (food.centerx, food.centery), 4)
+        food = pygame.draw.circle(screen, "orange", (food.centerx, food.centery), 14)
         snake = pygame.draw.rect(screen, "green", (snake.left, snake.top, snake.width, snake.height), 0)
         
         keys = pygame.key.get_pressed()
-        if any(keys) == True:
-            moving = True
+        moving = True
 
         if moving == True:
-            snake, lastDir = snakeMovement(keys, snake, lastDir)
+            if iterationCounter % difficulty == 0:
+                snake, lastDir = snakeMovement(keys, snake, lastDir)
         
         edgeCollision(snake.left, snake.right, snake.top, snake.bottom)
         score, snake = foodCollision(snake, food, score, screen)
-        #print(type(snake))
         drawGrid(screen)
 
         # flip() the display to put your work on screen
         pygame.display.flip()
 
-        # limits FPS to 60
-        # dt is delta time in seconds since last frame, used for framerate-
-        # independent physics.
-        dt = clock.tick(60) / 1000
-
         #TODO FIX SCORE VIEW
-        # show current score in title
         scoreMsg = "Current score: " + str(score)
         pygame.display.set_caption(scoreMsg)
 
@@ -71,15 +68,19 @@ def edgeCollision(left, right, top, bottom):
 def foodCollision(snake, food, score, screen):
     if snake.colliderect(food):
         foodSpawn(food)
-        snake = snakeGrowth(snake, screen)
+        snake = snakeGrowth(snake, screen, food)
         score += 100
     return score, snake 
 
 def foodSpawn(food):
-    food.move_ip(random.randint(-(food.centerx), 720-(food.centerx)), random.randint(-(food.centery), 720-(food.centery)))
+    foodX = 15+(30*(random.randint(0,23)))
+    foodY = 15+(30*(random.randint(0,23)))
+    food.move_ip(foodX, foodY)
 
-def snakeGrowth(snake, screen):
-    tail = pygame.draw.rect(screen, "green", ((snake.left-snake.width), (snake.top+snake.height), snake.width, snake.height), 0)
+#TO BE CHANGED
+#Add new rect at end of snake, somehow make them move together
+def snakeGrowth(snake, screen, food):
+    tail = pygame.draw.rect(screen, "green", (food.centerx-60, food.centery-60, 30, 30), 0)
     snake = snake.union(tail)
 
 def drawGrid(screen):
@@ -92,13 +93,13 @@ def snakeMovement(keys, snake, lastDir):
     #TODO FIX KEY PRIORITY
     dx, dy = 0, 0
     if keys[pygame.K_a]:
-        dx -= 2
+        dx -= 30
     elif keys[pygame.K_d]:
-        dx += 2
+        dx += 30
     elif keys[pygame.K_w]:
-        dy -= 2
+        dy -= 30
     elif keys[pygame.K_s]: 
-        dy += 2
+        dy += 30
     else:
         (dx,dy) = lastDir
     snake.move_ip(dx, dy)

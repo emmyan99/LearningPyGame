@@ -1,11 +1,13 @@
 import pygame
 import random
 
-#TODO: FIX GRID LIKE SCREEN
+#TODO: SNAP SNAKE TO GRID 
+#TODO: FIX FOOD PLACEMENT ON GRID
 #TODO: INCREMENT SIZE OF SNAKE
 #TODO: FIX MOVEMENT OF LARGER SNAKE
 #TODO: COLLISION WITH SELF 
 #TODO: FIX SNAKE AUTOMATIC MOVEMENT
+#TODO: LEADERBOARD
 
 def main():
     # pygame setup
@@ -17,10 +19,11 @@ def main():
     dt = 0
     score = 0
     screen.fill("black")
-    snake = pygame.draw.rect(screen, "green", (360, 360, 20, 20), 0)
+    snake = pygame.draw.rect(screen, "green", (360, 360, 30, 30), 0)
     food = pygame.draw.circle(screen, "orange", (random.randint(0,720), random.randint(0,720)), 4)
     moving = False
-    speed = 0
+    #speed = 1
+    lastDir = (0,0)
 
     while running:
         for event in pygame.event.get():
@@ -38,7 +41,7 @@ def main():
             moving = True
 
         if moving == True:
-            snake = snakeMovement(speed, keys, snake)
+            snake, lastDir = snakeMovement(keys, snake, lastDir)
         
         edgeCollision(snake.left, snake.right, snake.top, snake.bottom)
         score, snake = foodCollision(snake, food, score, screen)
@@ -80,27 +83,26 @@ def snakeGrowth(snake, screen):
     snake = snake.union(tail)
 
 def drawGrid(screen):
-    for i in range(0, 720, 20):
+    for i in range(0, 720, 30):
         pygame.draw.line(screen, (100, 100, 100), (0, i), (720, i))
         pygame.draw.line(screen, (100, 100, 100), (i, 0), (i, 720))
     pygame.display.update()    
 
-def snakeMovement(speed, keys, snake):
+def snakeMovement(keys, snake, lastDir):
     #TODO FIX KEY PRIORITY
+    dx, dy = 0, 0
     if keys[pygame.K_a]:
-        speed -= 20
-        snake.move_ip(speed, 0)
+        dx -= 2
     elif keys[pygame.K_d]:
-        speed += 20
-        snake.move_ip(speed, 0)
+        dx += 2
     elif keys[pygame.K_w]:
-        speed -= 20
-        snake.move_ip(0, speed)
+        dy -= 2
     elif keys[pygame.K_s]: 
-        speed += 20
-        snake.move_ip(0, speed)
-    return snake
-
+        dy += 2
+    else:
+        (dx,dy) = lastDir
+    snake.move_ip(dx, dy)
+    return snake, (dx, dy)
 
 
 main()

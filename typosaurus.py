@@ -33,11 +33,13 @@ indexes = []
 running = True
 pickwords = True
 wordPoint = 0
+timerStarted = False
+timerStopped = False
 
 
     # pick 10 random words from allwords
 while pickwords:
-    words = random.sample(allwords, k=10)
+    words = random.sample(allwords, k=3)
     pickwords = False
     words = ' '.join(words)
     wordsToDisplay = words
@@ -83,6 +85,8 @@ def text_render(lines, indexes):
             x_position += text_surface.get_width()  # Move x position to the right
         y_position += base_font.get_height()  # Move down to the next line
 
+def wpm_count(bool, time, points):
+    pass
 
 while running:
 
@@ -96,22 +100,38 @@ while running:
 
         # if key pressed
         if event.type == pygame.KEYDOWN:
+            if not timerStarted:
+                start_time = pygame.time.get_ticks()
+                timerStarted = True
+                print(start_time)
+            
 
-            if pygame.key.name(event.key) == words[0]:
-                words = words[1:]
-                print("correct")
-                indexes.append(indexCounter)
-                indexCounter += 1
-            elif " " == words[0]:
-                if event.key == pygame.K_SPACE:
+            if len(words) > 1:
+                if pygame.key.name(event.key) == words[0]:
                     words = words[1:]
                     print("correct")
+                    indexes.append(indexCounter)
                     indexCounter += 1
-                    wordPoint += 1
+                elif " " == words[0]:
+                    if event.key == pygame.K_SPACE:
+                        words = words[1:]
+                        print("correct")
+                        indexCounter += 1
+                        wordPoint += 1
+                    else:
+                        print("wrong key, spacebar expected")
                 else:
-                    print("wrong key, spacebar expected")
-            else:
-                print("wrong key", pygame.key.name(event.key), words[0])
+                    print("wrong key", pygame.key.name(event.key), words[0])
+            elif len(words) == 1:
+                print("done")
+                indexes.append(indexCounter)
+                if not timerStopped:
+                    time_since_start = pygame.time.get_ticks() - start_time
+                    print(pygame.time.get_ticks())
+                    print("time since start:", time_since_start)
+                    timerStopped = True
+                    wpm_count(timerStopped, time_since_start, wordPoint)
+                        
 
                     
                     
